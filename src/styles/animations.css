@@ -1,0 +1,68 @@
+/* Progress bar fill animation */
+@keyframes fill-bar {
+  from {
+    width: 0%;
+  }
+}
+
+/* Fade in for loaded content */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Spinner for loading state */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-fill {
+  animation: fill-bar 0.8s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-medium);
+  border-top-color: var(--accent-green);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Accordion expand/collapse */
+.accordion-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.accordion-content[data-expanded="false"] {
+  max-height: 0;
+  opacity: 0;
+}
+
+.accordion-content[data-expanded="true"] {
+  max-height: 5000px;
+  opacity: 1;
+}
+
+/* Category header hover */
+.category-header {
+  transition: background-color 0.15s ease;
+}
+
+.category-header:hover {
+  background-color: var(--bg-hover);
+}

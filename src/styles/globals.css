@@ -1,0 +1,112 @@
+:root {
+  /* Earthy dark palette — Grounded backyard theme */
+  --bg-deep: #0e0c0a;
+  --bg-base: #1a1612;
+  --bg-elevated: #2a231c;
+  --bg-surface: #352d24;
+  --bg-hover: #3f362c;
+
+  /* Text */
+  --text-primary: #e8dcc8;
+  --text-secondary: #a89880;
+  --text-muted: #6b5f50;
+
+  /* Accents */
+  --accent-green: #7cb342;
+  --accent-green-dim: #4a6d28;
+  --accent-green-glow: rgba(124, 179, 66, 0.4);
+  --accent-gold: #d4a843;
+  --accent-gold-dim: #8a6e2a;
+  --accent-red: #c75050;
+  --accent-blue: #5b8abf;
+
+  /* Category colors */
+  --cat-creatures: #8bc34a;
+  --cat-landmarks: #42a5f5;
+  --cat-molars: #e8e8e8;
+  --cat-mixr: #ab47bc;
+  --cat-scab: #ff7043;
+  --cat-bosses: #ef5350;
+  --cat-wendell: #66bb6a;
+  --cat-ominent: #5c6bc0;
+  --cat-burgl-chips: #ffa726;
+  --cat-stuff: #8d6e63;
+
+  /* Borders */
+  --border-subtle: rgba(168, 152, 128, 0.12);
+  --border-medium: rgba(168, 152, 128, 0.2);
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Shadows */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 12px var(--accent-green-glow);
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-deep);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Scrollbar theming */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-surface);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-hover);
+}
+
+/* Collected glow animation */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 6px var(--accent-green-glow);
+  }
+  50% {
+    box-shadow: 0 0 16px var(--accent-green-glow), 0 0 24px rgba(124, 179, 66, 0.15);
+  }
+}
+
+.collected {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.uncollected {
+  filter: grayscale(100%) brightness(0.5);
+  opacity: 0.4;
+}

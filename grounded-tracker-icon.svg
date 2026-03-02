@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background gradient - earthy/nature tones -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a2e0a"/>
+      <stop offset="50%" style="stop-color:#2d4a0f"/>
+      <stop offset="100%" style="stop-color:#1a3308"/>
+    </linearGradient>
+    <!-- Accent glow -->
+    <radialGradient id="glow" cx="50%" cy="45%" r="45%">
+      <stop offset="0%" style="stop-color:#7fff00;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#7fff00;stop-opacity:0"/>
+    </radialGradient>
+    <!-- Leaf vein gradient -->
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a8c1c"/>
+      <stop offset="100%" style="stop-color:#3a6e15"/>
+    </linearGradient>
+    <!-- Crosshair/tracker accent -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#c8ff00"/>
+      <stop offset="100%" style="stop-color:#7fbf00"/>
+    </linearGradient>
+    <!-- Ant silhouette gradient -->
+    <linearGradient id="antGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a"/>
+      <stop offset="100%" style="stop-color:#333333"/>
+    </linearGradient>
+    <!-- Drop shadow -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <!-- Glow filter for accent elements -->
+    <filter id="accentGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Subtle texture noise -->
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feBlend in="SourceGraphic" mode="multiply" result="noisy"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.08"/>
+      </feComponentTransfer>
+      <feBlend in="SourceGraphic" mode="overlay"/>
+    </filter>
+  </defs>
+
+  <!-- Rounded square base -->
+  <rect x="16" y="16" width="480" height="480" rx="96" ry="96" fill="url(#bgGrad)" filter="url(#shadow)"/>
+  
+  <!-- Subtle texture overlay -->
+  <rect x="16" y="16" width="480" height="480" rx="96" ry="96" filter="url(#noise)" opacity="0.5"/>
+  
+  <!-- Center glow -->
+  <rect x="16" y="16" width="480" height="480" rx="96" ry="96" fill="url(#glow)"/>
+
+  <!-- Leaf vein pattern (background texture) -->
+  <g opacity="0.12" stroke="#7fff00" stroke-width="1.2" fill="none">
+    <!-- Main diagonal vein -->
+    <path d="M100,420 Q256,256 420,100"/>
+    <!-- Branch veins -->
+    <path d="M140,380 Q200,320 256,290"/>
+    <path d="M180,400 Q240,340 300,300"/>
+    <path d="M260,260 Q320,200 370,150"/>
+    <path d="M280,280 Q340,220 400,170"/>
+    <!-- Cross veins -->
+    <path d="M120,350 Q180,370 220,360"/>
+    <path d="M300,200 Q340,180 380,190"/>
+  </g>
+
+  <!-- Outer tracking ring -->
+  <circle cx="256" cy="256" r="155" fill="none" stroke="#4a7a1a" stroke-width="3" opacity="0.5"/>
+  <circle cx="256" cy="256" r="155" fill="none" stroke="url(#accentGrad)" stroke-width="2" stroke-dasharray="12 8" opacity="0.6"/>
+
+  <!-- Tracker crosshair lines -->
+  <g stroke="url(#accentGrad)" stroke-width="2.5" opacity="0.7" filter="url(#accentGlow)">
+    <!-- Top -->
+    <line x1="256" y1="80" x2="256" y2="170"/>
+    <!-- Bottom -->
+    <line x1="256" y1="342" x2="256" y2="432"/>
+    <!-- Left -->
+    <line x1="80" y1="256" x2="170" y2="256"/>
+    <!-- Right -->
+    <line x1="342" y1="256" x2="432" y2="256"/>
+  </g>
+  
+  <!-- Crosshair tick marks -->
+  <g stroke="#c8ff00" stroke-width="2" opacity="0.5">
+    <line x1="256" y1="100" x2="256" y2="108"/>
+    <line x1="256" y1="404" x2="256" y2="412"/>
+    <line x1="100" y1="256" x2="108" y2="256"/>
+    <line x1="404" y1="256" x2="412" y2="256"/>
+  </g>
+
+  <!-- Ant silhouette (center subject being "tracked") -->
+  <g transform="translate(256,250) scale(1.1)" filter="url(#accentGlow)">
+    <!-- Ant body -->
+    <!-- Head -->
+    <ellipse cx="0" cy="-48" rx="18" ry="16" fill="url(#antGrad)"/>
+    <!-- Mandibles -->
+    <path d="M-10,-60 Q-18,-70 -14,-76" stroke="#2a2a2a" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M10,-60 Q18,-70 14,-76" stroke="#2a2a2a" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <!-- Antennae -->
+    <path d="M-6,-62 Q-20,-85 -28,-90" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M6,-62 Q20,-85 28,-90" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- Antenna tips -->
+    <circle cx="-28" cy="-90" r="3" fill="#444"/>
+    <circle cx="28" cy="-90" r="3" fill="#444"/>
+    <!-- Thorax -->
+    <ellipse cx="0" cy="-24" rx="16" ry="18" fill="url(#antGrad)"/>
+    <!-- Abdomen -->
+    <ellipse cx="0" cy="14" rx="22" ry="28" fill="url(#antGrad)"/>
+    <!-- Abdomen stripes -->
+    <path d="M-18,4 Q0,-2 18,4" stroke="#444" stroke-width="1.5" fill="none" opacity="0.4"/>
+    <path d="M-20,14 Q0,8 20,14" stroke="#444" stroke-width="1.5" fill="none" opacity="0.4"/>
+    <path d="M-18,24 Q0,18 18,24" stroke="#444" stroke-width="1.5" fill="none" opacity="0.4"/>
+    <!-- Legs - left -->
+    <path d="M-14,-32 Q-40,-44 -52,-36" stroke="#2a2a2a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M-14,-22 Q-44,-22 -56,-14" stroke="#2a2a2a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M-14,-12 Q-40,0 -50,10" stroke="#2a2a2a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <!-- Legs - right -->
+    <path d="M14,-32 Q40,-44 52,-36" stroke="#2a2a2a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M14,-22 Q44,-22 56,-14" stroke="#2a2a2a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M14,-12 Q40,0 50,10" stroke="#2a2a2a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <!-- Eye highlights -->
+    <circle cx="-8" cy="-52" r="4" fill="#1a1a1a"/>
+    <circle cx="8" cy="-52" r="4" fill="#1a1a1a"/>
+    <circle cx="-7" cy="-53" r="1.5" fill="#555"/>
+    <circle cx="9" cy="-53" r="1.5" fill="#555"/>
+  </g>
+
+  <!-- Small tracking dots on ring -->
+  <g fill="#c8ff00" opacity="0.8">
+    <circle cx="370" cy="148" r="4"/>
+    <circle cx="400" cy="210" r="3"/>
+    <circle cx="142" cy="365" r="3.5"/>
+    <circle cx="112" cy="300" r="3"/>
+  </g>
+
+  <!-- "GT" text mark bottom -->
+  <text x="256" y="438" text-anchor="middle" font-family="'Courier New', monospace" font-weight="bold" font-size="32" fill="#c8ff00" opacity="0.55" letter-spacing="8">GT</text>
+
+  <!-- Corner notch details (tech/HUD feel) -->
+  <g stroke="#7fff00" stroke-width="1.5" opacity="0.25">
+    <!-- Top-left -->
+    <path d="M56,120 L56,80 Q56,56 80,56 L120,56" fill="none"/>
+    <!-- Top-right -->
+    <path d="M392,56 L432,56 Q456,56 456,80 L456,120" fill="none"/>
+    <!-- Bottom-left -->
+    <path d="M56,392 L56,432 Q56,456 80,456 L120,456" fill="none"/>
+    <!-- Bottom-right -->
+    <path d="M392,456 L432,456 Q456,456 456,432 L456,392" fill="none"/>
+  </g>
+</svg>
