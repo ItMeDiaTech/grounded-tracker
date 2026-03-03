@@ -1,6 +1,6 @@
 use crate::models::{CategoryProgress, LandmarkItem};
 
-const TOTAL_LANDMARKS: u32 = 103;
+const TOTAL_LANDMARKS: u32 = 108;
 
 pub fn extract_landmarks(
     discovered_pois: &[String],

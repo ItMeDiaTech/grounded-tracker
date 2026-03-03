@@ -4,8 +4,8 @@ export interface LandmarkData {
   zone: string;
 }
 
-// Landmark POI IDs extracted from actual save files (103 total for S Rank)
-// IDs match the /Game/Design/PointsOfInterest/POI_* entries in HostPlayer.csav
+// Landmark POI IDs extracted from actual save files (108 total for S Rank)
+// IDs match the /Game/Design/PointsOfInterest/POI_* entries in HostPlayer.csav and World.csav
 export const LANDMARKS: LandmarkData[] = [
   // Grasslands
   { id: "POI_4Leaf_Clover", name: "Four Leaf Clover", zone: "Grasslands" },
@@ -122,9 +122,14 @@ export const LANDMARKS: LandmarkData[] = [
   { id: "POI_WoodPileEntrance", name: "Wood Pile Entrance", zone: "Upper Grasslands" },
   { id: "POI_WormHoleContainer", name: "Wormhole Container", zone: "Upper Grasslands" },
   { id: "POI_YogiSwoleHead", name: "Yogi Swole Head", zone: "Upper Grasslands" },
+  { id: "POI_BrawnyBoxEntrance", name: "Brawny Boy Bin Entrance", zone: "Upper Grasslands" },
+  { id: "POI_RottedStump", name: "Stump", zone: "Upper Grasslands" },
+  { id: "POI_WaspNest", name: "Wasp Nest", zone: "Upper Grasslands" },
+  { id: "POI_NewGamePlusMachine", name: "MIX.R", zone: "Upper Grasslands" },
 
   // Undershed
   { id: "POI_Field_Station_Undershed", name: "Undershed Field Station", zone: "Undershed" },
   { id: "POI_Undershed_Entrance", name: "Undershed Entrance", zone: "Undershed" },
   { id: "POI_Undershed_Lab", name: "Undershed Lab", zone: "Undershed" },
+  { id: "POI_Undershed_Sinkhole", name: "Undershed Sinkhole", zone: "Undershed" },
 ];

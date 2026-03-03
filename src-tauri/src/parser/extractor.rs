@@ -55,7 +55,15 @@ pub fn extract_save_progress(save_dir: &Path) -> Result<SaveProgress, AppError> 
 
         // Step 1: Extract structured data from HostPlayer
         let (achievements, achievement_progress) = extract_achievement_flags(&decompressed);
-        let discovered_pois = extract_poi_ids(&decompressed);
+        // Some POIs live in World.csav instead of HostPlayer
+        let mut discovered_pois = extract_poi_ids(&decompressed);
+        if let Some(ref world_data) = world_decompressed {
+            let world_pois = extract_poi_ids(world_data);
+            let mut merged: HashSet<String> = discovered_pois.drain(..).collect();
+            merged.extend(world_pois);
+            discovered_pois = merged.into_iter().collect();
+            discovered_pois.sort();
+        }
         let collected_themes = extract_theme_ids(&decompressed);
         let upgrade_levels = extract_upgrade_levels(&decompressed);
 
