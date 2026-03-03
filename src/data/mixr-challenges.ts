@@ -4,26 +4,17 @@ export interface MixrData {
   description: string;
 }
 
+// 8 MIX.R challenges (5 regular + 3 Super)
 export const MIXR_CHALLENGES: MixrData[] = [
-  { id: "mixr_0", name: "MIX.R Alpha", description: "First MIX.R challenge" },
-  { id: "mixr_1", name: "MIX.R Beta", description: "Second MIX.R challenge" },
-  { id: "mixr_2", name: "MIX.R Gamma", description: "Third MIX.R challenge" },
-  { id: "mixr_3", name: "MIX.R Delta", description: "Fourth MIX.R challenge" },
-  {
-    id: "mixr_4",
-    name: "MIX.R Epsilon",
-    description: "Fifth MIX.R challenge",
-  },
-  { id: "mixr_5", name: "MIX.R Zeta", description: "Sixth MIX.R challenge" },
-  {
-    id: "mixr_6",
-    name: "MIX.R Eta",
-    description: "Seventh MIX.R challenge",
-  },
-  {
-    id: "mixr_7",
-    name: "MIX.R Theta",
-    description: "Eighth MIX.R challenge",
-  },
-  { id: "mixr_8", name: "MIX.R Iota", description: "Ninth MIX.R challenge" },
+  // Regular MIX.Rs (5)
+  { id: "mixr_0", name: "Central Grasslands MIX.R", description: "Regular MIX.R" },
+  { id: "mixr_1", name: "Hedge MIX.R", description: "Regular MIX.R" },
+  { id: "mixr_2", name: "Haze MIX.R", description: "Regular MIX.R" },
+  { id: "mixr_3", name: "Sandbox MIX.R", description: "Regular MIX.R" },
+  { id: "mixr_4", name: "Northern Grasslands MIX.R", description: "Regular MIX.R" },
+
+  // Super MIX.Rs (3)
+  { id: "mixr_5", name: "Upper Grasslands Super MIX.R", description: "Super MIX.R" },
+  { id: "mixr_6", name: "Lawnmower Super MIX.R", description: "Super MIX.R" },
+  { id: "mixr_7", name: "Moldorc Super MIX.R", description: "Super MIX.R" },
 ];

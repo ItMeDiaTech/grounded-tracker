@@ -3,15 +3,14 @@ use std::collections::HashSet;
 use crate::models::{CategoryProgress, MixrItem};
 
 const MIXR_NAMES: &[&str] = &[
-    "MIX.R Alpha",
-    "MIX.R Beta",
-    "MIX.R Gamma",
-    "MIX.R Delta",
-    "MIX.R Epsilon",
-    "MIX.R Zeta",
-    "MIX.R Eta",
-    "MIX.R Theta",
-    "MIX.R Iota",
+    "Central Grasslands MIX.R",
+    "Hedge MIX.R",
+    "Haze MIX.R",
+    "Sandbox MIX.R",
+    "Northern Grasslands MIX.R",
+    "Upper Grasslands Super MIX.R",
+    "Lawnmower Super MIX.R",
+    "Moldorc Super MIX.R",
 ];
 
 pub fn extract_mixr(

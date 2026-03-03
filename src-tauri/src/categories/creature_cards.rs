@@ -58,7 +58,7 @@ const CARD_MAPPINGS: &[(&str, &str, &str)] = &[
     ("BestiaryWasp", "wasp", "Wasp"),
     ("BestiaryWaspDrone", "wasp_drone", "Wasp Drone"),
     ("BestiaryArcRBoss", "assistant_manager", "Assistant Manager"),
-    ("BestiarySpiderBossBroodmother", "broodmother", "Broodmother"),
+    ("BestiarySpiderBossBroodmother", "broodmother", "Hedge Broodmother"),
     ("BestiaryMant", "mant", "Mant"),
     ("BestiaryMantis", "orchid_mantis", "Orchid Mantis"),
     ("BestiarySchmector", "director_schmector", "Director Schmector"),

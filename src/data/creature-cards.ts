@@ -57,7 +57,7 @@ export const CREATURE_CARDS: CreatureCardData[] = [
   { id: "wasp", name: "Wasp" },
   { id: "wasp_drone", name: "Wasp Drone" },
   { id: "assistant_manager", name: "Assistant Manager" },
-  { id: "broodmother", name: "Broodmother" },
+  { id: "broodmother", name: "Hedge Broodmother" },
   { id: "mant", name: "Mant" },
   { id: "orchid_mantis", name: "Orchid Mantis" },
   { id: "director_schmector", name: "Director Schmector" },
