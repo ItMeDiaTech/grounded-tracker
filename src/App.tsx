@@ -94,6 +94,7 @@ function App() {
     return SCAB_SCHEMES.map((master) => ({
       id: master.id,
       name: master.name,
+      location: master.location,
       collected: allObtained || collectedIds.has(master.id),
     }));
   }, [data?.scabSchemes]);
@@ -234,6 +235,7 @@ function App() {
                 items={mergedScab}
                 labelKey="name"
                 collectedKey="collected"
+                subtitleKey="location"
               />
             </CategorySection>
 
@@ -288,11 +290,13 @@ function ItemGrid({
   items,
   labelKey,
   collectedKey,
+  subtitleKey,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   items: any[];
   labelKey: string;
   collectedKey: string;
+  subtitleKey?: string;
 }) {
   if (items.length === 0) {
     return (
@@ -306,6 +310,7 @@ function ItemGrid({
     <div style={styles.itemGrid}>
       {items.map((item, i) => {
         const label = String(item[labelKey] ?? `Item ${i + 1}`);
+        const subtitle = subtitleKey ? String(item[subtitleKey] ?? "") : "";
         const collected = Boolean(item[collectedKey]);
         return (
           <div
@@ -318,7 +323,12 @@ function ItemGrid({
                 : "var(--border-subtle)",
             }}
           >
-            <span style={styles.itemLabel}>{label}</span>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
+              <span style={styles.itemLabel}>{label}</span>
+              {subtitle && (
+                <span style={styles.itemSubtitle}>{subtitle}</span>
+              )}
+            </div>
             {collected && <span style={styles.checkmark}>&#10003;</span>}
           </div>
         );
@@ -364,6 +374,13 @@ const styles: Record<string, React.CSSProperties> = {
     transition: "all 0.2s ease",
   },
   itemLabel: {
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+  itemSubtitle: {
+    fontSize: "0.75rem",
+    color: "var(--text-muted)",
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
