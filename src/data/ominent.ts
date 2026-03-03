@@ -11,9 +11,9 @@ export const OMINENT_ITEMS: OminentData[] = [
   { id: "Note_OminentSpy_003", name: "Recon Journal: Intern", subcategory: "Recon Journals" },
   { id: "Note_OminentSpy_004", name: "Recon Journal: Special Forces", subcategory: "Recon Journals" },
   { id: "Note_OminentSpy_005", name: "Recon Journal: Health And Safety Officer", subcategory: "Recon Journals" },
-  { id: "Note_OminentSpy_006_a", name: "Recon Journal: Toxicologist (Part 1)", subcategory: "Recon Journals" },
-  { id: "Note_OminentSpy_006_b", name: "Recon Journal: Toxicologist (Part 2)", subcategory: "Recon Journals" },
-  { id: "Note_OminentSpy_006_c", name: "Recon Journal: Toxicologist (Part 3)", subcategory: "Recon Journals" },
+  { id: "Note_OminentSpy_006_a", name: "A Sticky Situation", subcategory: "Recon Journals" },
+  { id: "Note_OminentSpy_006_b", name: "Loyal Subjects", subcategory: "Recon Journals" },
+  { id: "Note_OminentSpy_006_c", name: "Recon Journal: Toxicologist", subcategory: "Recon Journals" },
   { id: "Note_OminentSpy_007", name: "Recon Journal: Biomedical Engineer", subcategory: "Recon Journals" },
 
   // Suspicious Snapshots (6)

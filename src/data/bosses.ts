@@ -27,13 +27,13 @@ export const BOSSES: BossData[] = [
   {
     id: "killdirector",
     flag: "KillDirector",
-    name: "Assistant Manager",
-    location: "Black Ant Lab",
+    name: "Director Schmector",
+    location: "Castle Moldorc",
   },
   {
     id: "killmantis",
     flag: "KillMantis",
     name: "Mantis",
-    location: "Undershed Lab",
+    location: "Mantis Den",
   },
 ];

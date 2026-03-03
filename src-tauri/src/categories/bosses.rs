@@ -11,8 +11,8 @@ const BOSS_DATA: &[(&str, &str, &str)] = &[
         "Haze Lab",
     ),
     ("KillWaspQueen", "Wasp Queen", "Upper Yard"),
-    ("KillDirector", "Assistant Manager", "Black Ant Lab"),
-    ("KillMantis", "Mantis", "Undershed Lab"),
+    ("KillDirector", "Director Schmector", "Castle Moldorc"),
+    ("KillMantis", "Mantis", "Mantis Den"),
 ];
 
 pub fn extract_bosses(
