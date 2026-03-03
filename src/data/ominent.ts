@@ -24,14 +24,6 @@ export const OMINENT_ITEMS: OminentData[] = [
   { id: "OminentInfiltrator_Polaroid_JavaMatic", name: "Suspicious Snapshot: Java-Matic", subcategory: "Suspicious Snapshots" },
   { id: "OminentInfiltrator_Polaroid_Muldorc", name: "Suspicious Snapshot: Moldorc", subcategory: "Suspicious Snapshots" },
 
-  // Audio Logs (6)
-  { id: "AudioLogOminentA01", name: "Ominent Audio Log 1", subcategory: "Audio Logs" },
-  { id: "AudioLogOminentA02", name: "Ominent Audio Log 2", subcategory: "Audio Logs" },
-  { id: "AudioLogOminentA03", name: "Ominent Audio Log 3", subcategory: "Audio Logs" },
-  { id: "AudioLogOminentA04", name: "Ominent Audio Log 4", subcategory: "Audio Logs" },
-  { id: "AudioLogOminentA05", name: "Ominent Audio Log 5", subcategory: "Audio Logs" },
-  { id: "AudioLogOminentA06", name: "Ominent Audio Log 6", subcategory: "Audio Logs" },
-
   // Data (1)
   { id: "Ominent_Disk", name: "Ominent Data Disk", subcategory: "Data" },
 ];

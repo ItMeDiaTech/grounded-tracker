@@ -1,11 +1,10 @@
 use crate::models::{CategoryProgress, CollectibleItem};
 
-const TOTAL_OMINENT: u32 = 22;
+const TOTAL_OMINENT: u32 = 16;
 
 fn is_ominent_item(name: &str) -> bool {
     name.starts_with("OminentInfiltrator_")
         || name.starts_with("Note_OminentSpy_")
-        || name.starts_with("AudioLogOminent")
         || name == "Ominent_Disk"
 }
 

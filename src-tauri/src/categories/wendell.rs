@@ -1,6 +1,6 @@
 use crate::models::{CategoryProgress, CollectibleItem};
 
-const TOTAL_WENDELL: u32 = 62;
+const TOTAL_WENDELL: u32 = 67;
 
 fn is_wendell_item(name: &str) -> bool {
     name.starts_with("AudioLogWendell")
@@ -17,6 +17,9 @@ fn is_wendell_item(name: &str) -> bool {
         || name.starts_with("Oak_Lab_Note")
         || name.starts_with("NoteStumpLab")
         || name.starts_with("HedgeOverlookNote")
+        || name.starts_with("HedgeLabNote")
+        || name.starts_with("HedgeStorageNote")
+        || name.starts_with("NoteRaisin")
         || name.starts_with("FieldStationMixrNote")
         || name.starts_with("Note_HiddenKid_")
         || name.starts_with("Note_Wendell_")
