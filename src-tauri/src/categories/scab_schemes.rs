@@ -32,12 +32,59 @@ pub fn extract_scab_schemes(
 }
 
 fn format_scheme_name(raw: &str) -> String {
-    let mut result = String::new();
-    for (i, ch) in raw.chars().enumerate() {
-        if i > 0 && ch.is_uppercase() {
-            result.push(' ');
-        }
-        result.push(ch);
+    match raw {
+        "Aerobics" => "Aerobics",
+        "Chewgum" => "Table Gum",
+        "ChubbsSeries" => "Chubbs Series",
+        "CondimentJockey" => "Condiment Jockey",
+        "Corporate" => "Corporate Issue",
+        "Cyberstrike" => "Cyberstrike",
+        "DogLoaf" => "Dog Loaf",
+        "FlyingV" => "Flying-V",
+        "Frankenline" => "Frankenline",
+        "Fright" => "Fright",
+        "Frosting" => "Frosting",
+        "Garbo" => "Garbo",
+        "Ghost" => "Ghostmint",
+        "Gingerspice" => "Gingerspice",
+        "Girthscape" => "Girthscape",
+        "Greystone" => "Greystone",
+        "Gunmetal" => "Gunmetal",
+        "Hedgeberry" => "Hedgeberry",
+        "HighDensity" => "High Density",
+        "Holidazzle" => "Holidazzle",
+        "HotDogHorror" => "Billy Hog Horror",
+        "IceCap" => "Frostbite",
+        "Lasercorp" => "Lasercorp",
+        "Legend" => "Legend",
+        "Marsh" => "Shallows",
+        "Metamorphosis" => "Syndrome",
+        "Miterider" => "Miterider",
+        "Moldorc" => "Moldorc",
+        "Murk" => "Muck",
+        "Neomauve" => "Neomauve",
+        "Panfish" => "Panfish",
+        "Porridge" => "Porridge",
+        "PunchO" => "Punch-O",
+        "QuestModule" => "RPG Module",
+        "SCAB1" => "SCA.B v1.02",
+        "SCAB2" => "SCA.B v2.11",
+        "SCAB3" => "SCA.B v3.09",
+        "SCABBugged" => "SCA.B Bugged",
+        "SadStab" => "The Sad Stab",
+        "Sankematic" => "JavaMatic",
+        "Sawdust" => "Sawdust",
+        "Sewage" => "Sewage",
+        "Shinebright" => "Shinebright",
+        "SuperToast" => "Toasted",
+        "Superblaster" => "Hyperblaster",
+        "Supreme" => "Supreme",
+        "Textbook" => "Textbook",
+        "Tully" => "Tully",
+        "VisualAid" => "Bugjuice",
+        "Witch" => "Witchly",
+        "YogiSwole" => "Swole",
+        _ => raw,
     }
-    result
+    .to_string()
 }

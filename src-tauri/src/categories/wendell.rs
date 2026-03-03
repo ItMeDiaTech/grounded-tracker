@@ -1,6 +1,6 @@
 use crate::models::{CategoryProgress, CollectibleItem};
 
-const TOTAL_WENDELL: u32 = 61;
+const TOTAL_WENDELL: u32 = 62;
 
 fn is_wendell_item(name: &str) -> bool {
     name.starts_with("AudioLogWendell")
@@ -21,6 +21,7 @@ fn is_wendell_item(name: &str) -> bool {
         || name.starts_with("Note_HiddenKid_")
         || name.starts_with("Note_Wendell_")
         || name.contains("GeoTentNote")
+        || name == "GrilledScience"
 }
 
 pub fn extract_wendell(

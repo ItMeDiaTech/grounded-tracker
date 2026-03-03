@@ -81,4 +81,5 @@ export const WENDELL_TAPES: WendellData[] = [
   { id: "Trash_GeoTentNote_01", name: "Trash Heap Geo Tent Note", subcategory: "Misc" },
   { id: "Sandbox_GeoTentNote_01", name: "Sandbox Geo Tent Note", subcategory: "Misc" },
   { id: "PicnicTable_GeoTentNote_01", name: "Picnic Table Geo Tent Note", subcategory: "Misc" },
+  { id: "GrilledScience", name: "Grilled Science", subcategory: "Misc" },
 ];

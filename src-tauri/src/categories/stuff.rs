@@ -1,18 +1,32 @@
 use crate::models::{CategoryProgress, CollectibleItem};
 
-const TOTAL_STUFF: u32 = 40;
+const TOTAL_STUFF: u32 = 33;
 
 fn is_stuff_item(name: &str) -> bool {
-    name.starts_with("BossNote")
+    // Boss Notes (4 — only the main boss notes, not ant queen notes)
+    name == "BossNoteBroodmother"
+        || name == "BossNoteMantis"
+        || name == "BossNoteWasp"
+        || name == "BossNoteIBM"
+        // Super Duper (3)
         || name.starts_with("DuperDisc")
+        // Password Scribbles (4)
         || name.starts_with("PasswordPiece")
-        || name.starts_with("Key_")
-        || name.starts_with("KeyZipline")
+        // Keys (5 — regular keys + ASST. Manager Keycard)
+        || name == "Key_BlackAntHill"
+        || name == "Key_MoatTreasureChest"
+        || name == "Key_PondTreasureChest"
+        || name == "Key_TableTreasureChest"
+        || name == "Key_UpperYardTreasureChest"
+        // Filled Embiggening Cell (1)
+        || name == "EmbiggeningCocktailFinal"
+        // ZIP.R (1)
+        || name == "KeyZiplineAscender"
+        // Recipes (6) + Statues (7)
         || name.starts_with("Recipe")
-        || name.starts_with("DefensePointSuper")
+        // Products (2)
         || name == "SCABManual"
         || name == "ScannerBracelet"
-        || name == "GrilledScience"
 }
 
 pub fn extract_stuff(
