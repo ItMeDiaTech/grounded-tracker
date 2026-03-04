@@ -18,8 +18,8 @@ struct ProgressSnapshot {
         bool discovered = false;
     };
     struct MilkMolarInfo {
-        uint32_t regularCollected = 0, regularTotal = 93;
-        uint32_t megaCollected = 0, megaTotal = 14;
+        uint32_t regularCollected = 0, regularTotal = 78;
+        uint32_t megaCollected = 0, megaTotal = 45;
         uint32_t totalSpent = 0;
     };
     struct MixrInfo {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import type { SaveProgress, ConnectionStatus } from "../types/save-data";
@@ -9,6 +9,7 @@ interface SaveSyncState {
   lastError: string | null;
   lastSync: string | null;
   loading: boolean;
+  isStale: boolean;
 }
 
 export function useSaveSync(): SaveSyncState {
@@ -17,13 +18,17 @@ export function useSaveSync(): SaveSyncState {
   const [lastError, setLastError] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isStale, setIsStale] = useState(false);
+  const hasDataRef = useRef(false);
 
   useEffect(() => {
     // Listen for save data updates from the pipe connection
     const unlistenSave = listen<SaveProgress>("save-updated", (event) => {
       setData(event.payload);
+      hasDataRef.current = true;
       setLastSync(new Date().toLocaleTimeString());
       setLastError(null);
+      setIsStale(false);
       setLoading(false);
     });
 
@@ -36,6 +41,10 @@ export function useSaveSync(): SaveSyncState {
       setStatus(event.payload);
       if (event.payload.error) {
         setLastError(event.payload.error);
+      }
+      // Mark data as stale when we disconnect but still have data
+      if (!event.payload.connected && hasDataRef.current) {
+        setIsStale(true);
       }
       setLoading(false);
     });
@@ -58,5 +67,5 @@ export function useSaveSync(): SaveSyncState {
     };
   }, []);
 
-  return { data, status, lastError, lastSync, loading };
+  return { data, status, lastError, lastSync, loading, isStale };
 }

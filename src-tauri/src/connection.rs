@@ -110,7 +110,7 @@ pub fn start_connection_loop(app: AppHandle) {
 
             // 3. Read message (blocking)
             match client.read_message() {
-                Ok(progress) => {
+                Ok(Some(progress)) => {
                     let now = chrono::Local::now()
                         .format("%H:%M:%S")
                         .to_string();
@@ -120,6 +120,15 @@ pub fn start_connection_loop(app: AppHandle) {
                         s.error = None;
                     }
                     let _ = app.emit("save-updated", &progress);
+                }
+                Ok(None) => {
+                    // Heartbeat — DLL alive but no game data yet
+                    {
+                        let mut s = state.lock().unwrap();
+                        s.connected = true;
+                        s.error = None;
+                    }
+                    emit_status(&app, &state);
                 }
                 Err(e) => {
                     // Pipe broken — disconnect and retry

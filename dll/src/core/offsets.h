@@ -23,6 +23,7 @@ constexpr uintptr_t ProcessEventIdx = 0x00000044;
 constexpr ptrdiff_t UWorld_PersistentLevel = 0x0030;
 constexpr ptrdiff_t UWorld_AuthorityGameMode = 0x0168;
 constexpr ptrdiff_t UWorld_GameState = 0x0170;        // AGameStateBase*
+constexpr ptrdiff_t UWorld_Levels = 0x0190;             // TArray<ULevel*>
 constexpr ptrdiff_t UWorld_GameInstance = 0x01D8;      // UGameInstance*
 
 // --- AGameStateBase ---
@@ -123,6 +124,14 @@ constexpr ptrdiff_t BossStateMgr_ConditionalBossDead = 0x0238;   // UConditional
 constexpr ptrdiff_t BossStateMgr_ConditionalBossActive = 0x0240; // UConditionalToggleComponent*
 constexpr ptrdiff_t BossStateMgr_Persistence = 0x0248;           // UPersistenceComponent*
 
+// --- ULevel (Engine_classes.hpp:20650, size 0x0290) ---
+constexpr ptrdiff_t ULevel_Actors = 0x0098;            // TArray<AActor*>
+constexpr ptrdiff_t ULevel_OwningWorld = 0x00B8;       // UWorld*
+
+// --- UObject core offsets ---
+constexpr ptrdiff_t UObject_ClassPrivate = 0x0010;     // UClass*
+constexpr ptrdiff_t UObject_NamePrivate = 0x0018;      // FName
+
 // --- AMIXRTerminal (Maine_classes.hpp:28097, size 0x0270) ---
 constexpr ptrdiff_t MIXRTerminal_CompletionCount = 0x0248;  // int32 (replicated)
 
@@ -152,6 +161,11 @@ constexpr ptrdiff_t GlobalUIData_DefaultNightUITheme = 0x0480; // TSubclassOf
 // --- UPlayerStatsComponent (size 0x0150) ---
 constexpr ptrdiff_t StatsComp_Configs = 0x00E0;    // TArray<UPlayerStatConfig*>
 constexpr ptrdiff_t StatsComp_PlayerStats = 0x00F0; // TMap<UPlayerStatConfig*, int32>
+
+// --- FDataTableRowHandle_NetCrc (0x0028 = 40 bytes) ---
+// Layout: DataTable*(0x00, 8) + RowName FName(0x08, 8) + NetCrc padding(0x10, 24)
+constexpr size_t    FDataTableRowHandle_NetCrc_Size = 0x0028;     // 40 bytes
+constexpr ptrdiff_t FDataTableRowHandle_NetCrc_RowName = 0x0008;  // FName offset within struct
 
 // --- TArray layout (UE4 standard) ---
 constexpr ptrdiff_t TArray_Data = 0x0000;   // T*

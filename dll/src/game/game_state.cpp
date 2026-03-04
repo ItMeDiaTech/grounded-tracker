@@ -8,6 +8,7 @@
 #include "table_items.h"
 #include "upgrades.h"
 #include "../core/engine.h"
+#include "../core/memory.h"
 #include "../core/offsets.h"
 #include "../core/ue4_types.h"
 #include "../util/logger.h"
@@ -123,23 +124,55 @@ ProgressSnapshot GameStateReader::ReadAll() {
 
 void GameStateReader::ReadBosses(ProgressSnapshot& snap) {
     // 5 bosses — matches src-tauri/src/categories/bosses.rs
-    static const struct { const char* id; const char* name; } BOSS_DATA[] = {
-        {"killbroodmother", "Hedge Broodmother"},
-        {"killinfectedbroodmother", "Infected Broodmother"},
-        {"killwaspqueen", "Wasp Queen"},
-        {"killdirector", "Director Schmector"},
-        {"killmantis", "Mantis"},
+    // bestiaryFallback: verified FNames from live game data (2026-03-04)
+    static const struct { const char* id; const char* name; const char* bestiaryFallback; } BOSS_DATA[] = {
+        {"killbroodmother", "Hedge Broodmother", "BestiarySpiderBossBroodmother"},
+        {"killinfectedbroodmother", "Infected Broodmother", "BestiaryBossIBM"},
+        {"killwaspqueen", "Wasp Queen", "BestiaryWaspQueen"},
+        {"killdirector", "Director Schmector", "BestiarySchmector"},
+        {"killmantis", "Mantis", "BestiaryMantis"},
     };
 
     snap.bosses.clear();
-    for (auto& [id, name] : BOSS_DATA) {
+    for (auto& [id, name, fallback] : BOSS_DATA) {
         bool defeated = Achievements::IsAchievementComplete(m_playerState, id);
         snap.bosses.push_back({id, name, defeated});
+    }
+
+    // Fallback: if any boss not detected via achievements, check OwnedKeyItems for
+    // Bestiary entries. Having the creature card for a boss means it was fought/killed.
+    bool needFallback = false;
+    for (auto& b : snap.bosses) {
+        if (!b.defeated) { needFallback = true; break; }
+    }
+
+    if (needFallback && m_gameState) {
+        auto partyComp = Memory::SafeReadPtr(m_gameState, Offsets::GameState_PartyComponent);
+        if (partyComp) {
+            auto arr = ReadTArray(partyComp.value(), Offsets::PartyComp_OwnedKeyItems);
+            if (arr) {
+                for (int32_t i = 0; i < arr->count; ++i) {
+                    uintptr_t elem = arr->data + i * Offsets::FDataTableRowHandle_NetCrc_Size;
+                    std::string rowName = ResolveFNameAt(elem, Offsets::FDataTableRowHandle_NetCrc_RowName);
+                    if (rowName.empty() || rowName.find("Bestiary") != 0) continue;
+
+                    for (size_t j = 0; j < snap.bosses.size(); ++j) {
+                        if (!snap.bosses[j].defeated &&
+                            rowName.find(BOSS_DATA[j].bestiaryFallback) == 0) {
+                            // Prefix match catches base + gold variants (e.g. BestiarySchmectorGold)
+                            snap.bosses[j].defeated = true;
+                            LOG_INFO("Boss '%s' detected via OwnedKeyItems fallback ('%s')",
+                                     snap.bosses[j].name.c_str(), rowName.c_str());
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
 void GameStateReader::ReadCreatureCards(ProgressSnapshot& snap) {
-    ReadCreatureCardsFromMemory(m_playerState, snap);
+    ReadCreatureCardsFromMemory(m_gameState, snap);
 }
 
 void GameStateReader::ReadLandmarks(ProgressSnapshot& snap) {

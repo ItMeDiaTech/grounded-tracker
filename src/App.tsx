@@ -29,7 +29,7 @@ import type {
 import "./styles/animations.css";
 
 function App() {
-  const { data, status, lastError, lastSync, loading } = useSaveSync();
+  const { data, status, lastError, lastSync, loading, isStale } = useSaveSync();
 
   // Merge save data with master data so uncollected items show as faded
   const mergedBosses = useMemo<BossItem[]>(() => {
@@ -163,9 +163,15 @@ function App() {
 
       {lastError && <ErrorBanner message={lastError} />}
 
+      {isStale && data && (
+        <div style={styles.staleBanner}>
+          Data may be outdated — waiting to reconnect...
+        </div>
+      )}
+
       <main style={styles.main}>
         {data && (
-          <div style={styles.categories}>
+          <div style={{ ...styles.categories, opacity: isStale ? 0.7 : 1 }}>
             <CategorySection
               title="Bosses"
               icon="skull"
@@ -391,6 +397,14 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: "bold",
     marginLeft: "var(--space-sm)",
     flexShrink: 0,
+  },
+  staleBanner: {
+    background: "rgba(217, 164, 6, 0.15)",
+    color: "#d9a406",
+    padding: "var(--space-sm) var(--space-lg)",
+    textAlign: "center" as const,
+    fontSize: "0.9rem",
+    borderBottom: "1px solid rgba(217, 164, 6, 0.3)",
   },
   emptyState: {
     padding: "var(--space-lg)",

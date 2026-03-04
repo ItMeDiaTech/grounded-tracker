@@ -28,6 +28,8 @@ void PollThreadFunc() {
         if (snap.valid) {
             g_pipeServer.PushUpdate(snap);
             OverlayUI::UpdateState(snap);
+        } else {
+            g_pipeServer.PushHeartbeat();
         }
         Sleep(g_pollIntervalMs);
     }

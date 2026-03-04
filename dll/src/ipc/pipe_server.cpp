@@ -183,6 +183,20 @@ void PipeServer::PushUpdate(const ProgressSnapshot& snap) {
     }
 }
 
+void PipeServer::PushHeartbeat() {
+    std::lock_guard lock(m_writeMutex);
+
+    if (m_hPipe == INVALID_HANDLE_VALUE) return;
+
+    std::string jsonStr = R"({"type":"heartbeat","valid":false})";
+    if (!WriteMessage(jsonStr)) {
+        LOG_WARN("Failed to write heartbeat to pipe, disconnecting");
+        DisconnectNamedPipe(m_hPipe);
+        CloseHandle(m_hPipe);
+        m_hPipe = INVALID_HANDLE_VALUE;
+    }
+}
+
 bool PipeServer::WriteMessage(const std::string& json) {
     // Length-prefixed protocol: [u32 LE length][JSON bytes]
     uint32_t length = static_cast<uint32_t>(json.size());

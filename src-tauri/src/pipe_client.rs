@@ -35,8 +35,8 @@ impl PipeClient {
     }
 
     /// Read the next length-prefixed JSON message from the pipe.
-    /// Blocks until a message is available.
-    pub fn read_message(&mut self) -> Result<SaveProgress, AppError> {
+    /// Returns Ok(Some(progress)) for data messages, Ok(None) for heartbeats.
+    pub fn read_message(&mut self) -> Result<Option<SaveProgress>, AppError> {
         let handle = self
             .handle
             .as_mut()
@@ -63,12 +63,21 @@ impl PipeClient {
             AppError::Pipe(format!("Failed to read JSON payload: {}", e))
         })?;
 
-        // Deserialize
-        let progress: SaveProgress = serde_json::from_slice(&json_buf).map_err(|e| {
+        // Check if it's a heartbeat message
+        let value: serde_json::Value = serde_json::from_slice(&json_buf).map_err(|e| {
             AppError::Pipe(format!("Failed to parse JSON: {}", e))
         })?;
 
-        Ok(progress)
+        if value.get("type").and_then(|t| t.as_str()) == Some("heartbeat") {
+            return Ok(None);
+        }
+
+        // Deserialize as full progress data
+        let progress: SaveProgress = serde_json::from_value(value).map_err(|e| {
+            AppError::Pipe(format!("Failed to deserialize progress: {}", e))
+        })?;
+
+        Ok(Some(progress))
     }
 
     pub fn disconnect(&mut self) {

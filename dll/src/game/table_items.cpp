@@ -243,7 +243,7 @@ void ReadTableItemsFromMemory(uintptr_t gameState, ProgressSnapshot& snap) {
     if (!gameState) return;
 
     // PartyComponent -> OwnedKeyItems (TArray<FDataTableRowHandle_NetCrc>)
-    // Each element is 12 bytes: FName(8) + CRC(4)
+    // Each element is 40 bytes (FDataTableRowHandle_NetCrc_Size stride)
     auto partyComp = Memory::SafeReadPtr(gameState, Offsets::GameState_PartyComponent);
     if (!partyComp) {
         LOG_DEBUG("ReadTableItems: PartyComponent null");
@@ -256,21 +256,33 @@ void ReadTableItemsFromMemory(uintptr_t gameState, ProgressSnapshot& snap) {
         return;
     }
 
+    // OwnedKeyItems is TArray<FDataTableRowHandle_NetCrc> — each element is 40 bytes (0x28).
+    // Layout per element: DataTable*(0x00, 8) + RowName FName(0x08, 8) + NetCrc padding(0x10, 24)
     uint32_t matched = 0;
-    static constexpr size_t ROW_HANDLE_SIZE = 12;  // FName(8) + CRC(4)
+    static bool loggedOnce = false;
+    bool shouldLog = !loggedOnce && arr->count > 0;
+
+    if (shouldLog) {
+        LOG_INFO("=== OwnedKeyItems Scan (%d entries, stride=%zu) ===",
+                 arr->count, Offsets::FDataTableRowHandle_NetCrc_Size);
+    }
 
     for (int32_t i = 0; i < arr->count; ++i) {
-        uintptr_t elemAddr = arr->data + i * ROW_HANDLE_SIZE;
-        std::string rowName = ResolveFNameAt(elemAddr, 0);
+        uintptr_t elem = arr->data + i * Offsets::FDataTableRowHandle_NetCrc_Size;
+        std::string rowName = ResolveFNameAt(elem, Offsets::FDataTableRowHandle_NetCrc_RowName);
         if (rowName.empty()) continue;
+        if (rowName.find("None") == 0) continue;
+
+        if (shouldLog) {
+            LOG_DEBUG("  OwnedKeyItem[%d]: '%s'", i, rowName.c_str());
+        }
 
         ItemCategory cat = ClassifyItem(rowName);
 
-        // Find in the appropriate master list and mark as collected
         auto markCollected = [&](std::vector<ProgressSnapshot::CollectibleInfo>& list) -> bool {
-            for (auto& item : list) {
-                if (item.id == rowName) {
-                    item.collected = true;
+            for (size_t j = 0; j < list.size(); ++j) {
+                if (!list[j].collected && list[j].id == rowName) {
+                    list[j].collected = true;
                     matched++;
                     return true;
                 }
@@ -284,9 +296,13 @@ void ReadTableItemsFromMemory(uintptr_t gameState, ProgressSnapshot& snap) {
             case ItemCategory::Burgl:    markCollected(snap.burglChips); break;
             case ItemCategory::Stuff:    markCollected(snap.stuff); break;
             case ItemCategory::Unknown:
-                LOG_DEBUG("ReadTableItems: unclassified key item '%s'", rowName.c_str());
                 break;
         }
+    }
+
+    if (shouldLog) {
+        LOG_INFO("=== End OwnedKeyItems Scan (matched %u) ===", matched);
+        loggedOnce = true;
     }
 
     LOG_DEBUG("ReadTableItems: %u matched from %d owned key items "

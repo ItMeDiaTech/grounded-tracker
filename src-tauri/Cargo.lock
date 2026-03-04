@@ -595,7 +595,7 @@ dependencies = [
 
 [[package]]
 name = "dt-grounded"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "chrono",
  "serde",

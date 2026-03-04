@@ -11,6 +11,7 @@ public:
     bool Start();
     void Stop();
     void PushUpdate(const ProgressSnapshot& snap);
+    void PushHeartbeat();
 
 private:
     HANDLE m_hPipe = INVALID_HANDLE_VALUE;
