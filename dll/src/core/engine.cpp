@@ -103,28 +103,19 @@ uintptr_t GetGameState() {
 }
 
 uintptr_t GetPlayerState() {
-    auto world = GetUWorld();
-    if (!world) return 0;
+    // Walk: GameState -> PlayerArray[0] (simpler than GameInstance path)
+    auto gameState = GetGameState();
+    if (!gameState) return 0;
 
-    // Walk: UWorld -> GameInstance -> LocalPlayers[0] -> PlayerController -> PlayerState
-    if (Offsets::UWorld_GameInstance == 0) {
-        LOG_WARN("UWorld::GameInstance offset not set");
-        return 0;
-    }
+    // AGameStateBase::PlayerArray at offset 0x0250 is TArray<APlayerState*>
+    auto arrayData = Memory::SafeReadPtr(gameState, Offsets::GameStateBase_PlayerArray);
+    if (!arrayData) return 0;
 
-    auto gameInstance = Memory::SafeReadPtr(world, Offsets::UWorld_GameInstance);
-    if (!gameInstance) return 0;
+    // Read the TArray count
+    auto count = Memory::SafeRead<int32_t>(gameState, Offsets::GameStateBase_PlayerArray + Offsets::TArray_Count);
+    if (!count || count.value() <= 0) return 0;
 
-    auto localPlayers = Memory::SafeReadPtr(gameInstance.value(), Offsets::GameInstance_LocalPlayers);
-    if (!localPlayers) return 0;
-
-    // TArray<ULocalPlayer*> — read first element
-    auto firstPlayer = Memory::SafeReadPtr(localPlayers.value());
-    if (!firstPlayer) return 0;
-
-    auto playerController = Memory::SafeReadPtr(firstPlayer.value(), Offsets::LocalPlayer_PlayerController);
-    if (!playerController) return 0;
-
-    auto playerState = Memory::SafeReadPtr(playerController.value(), Offsets::PlayerController_PlayerState);
-    return playerState.value_or(0);
+    // Read first element (PlayerArray[0])
+    auto firstPlayerState = Memory::SafeReadPtr(arrayData.value());
+    return firstPlayerState.value_or(0);
 }
