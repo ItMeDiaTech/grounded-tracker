@@ -16,7 +16,7 @@ public:
     static Logger& Instance();
 
 private:
-    std::mutex m_mutex;
+    std::recursive_mutex m_mutex;
     std::ofstream m_file;
     bool m_initialized = false;
 };

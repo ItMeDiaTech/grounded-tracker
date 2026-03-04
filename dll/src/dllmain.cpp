@@ -34,8 +34,8 @@ void PollThreadFunc() {
     LOG_INFO("Poll thread exiting");
 }
 
-void InitThread(HMODULE hModule) {
-    // Initialize logger
+void InitThreadSafe(HMODULE hModule) {
+    // Initialize logger first (before anything else)
     wchar_t tempPath[MAX_PATH];
     GetTempPathW(MAX_PATH, tempPath);
     std::wstring logPath = std::wstring(tempPath) + L"GroundedTracker.log";
@@ -46,12 +46,15 @@ void InitThread(HMODULE hModule) {
 
     // Wait for the game module to be fully loaded
     HMODULE gameModule = nullptr;
-    while (!g_shutdown.load()) {
+    for (int i = 0; i < 100 && !g_shutdown.load(); ++i) {
         gameModule = GetModuleHandleW(L"Maine-Win64-Shipping.exe");
         if (gameModule) break;
         Sleep(100);
     }
-    if (g_shutdown.load()) return;
+    if (!gameModule || g_shutdown.load()) {
+        LOG_ERROR("Game module not found after 10s");
+        return;
+    }
 
     LOG_INFO("Game module found at: 0x%llx", reinterpret_cast<uintptr_t>(gameModule));
 
@@ -64,17 +67,20 @@ void InitThread(HMODULE hModule) {
 
     // Initialize game state reader
     if (!g_reader.Initialize()) {
-        LOG_ERROR("Failed to initialize game state reader");
-        return;
-    }
-    LOG_INFO("Game state reader initialized");
-
-    // Install DX11 hook for ImGui overlay
-    if (!DX11Hook::Install()) {
-        LOG_WARN("Failed to install DX11 hook (overlay disabled)");
+        LOG_WARN("Game state reader init failed (will retry during polling)");
     } else {
-        LOG_INFO("DX11 hook installed");
+        LOG_INFO("Game state reader initialized");
     }
+
+    // Install DX11 hook for ImGui overlay (non-fatal)
+    // Disabled for initial testing to avoid crashes
+    // TODO: Re-enable after verifying pipe communication works
+    LOG_INFO("DX11 hook SKIPPED (disabled for initial testing)");
+    // if (!DX11Hook::Install()) {
+    //     LOG_WARN("Failed to install DX11 hook (overlay disabled)");
+    // } else {
+    //     LOG_INFO("DX11 hook installed");
+    // }
 
     // Start named pipe server
     if (!g_pipeServer.Start()) {
@@ -86,10 +92,33 @@ void InitThread(HMODULE hModule) {
     // Start polling thread
     g_pollThread = std::thread(PollThreadFunc);
 
-    LOG_INFO("Initialization complete — F9 toggles overlay");
+    LOG_INFO("Initialization complete");
+}
 
-    // Register F9 hotkey (polled in overlay WndProc)
-    // Hotkey handling is done via WndProc subclass in dx11_hook
+static DWORD g_lastException = 0;
+
+// SEH filter function — captures exception code
+static int CrashFilter(DWORD code) {
+    g_lastException = code;
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
+// SEH wrapper must not contain C++ objects with destructors
+static void InitThreadSEH(HMODULE hModule) {
+    __try {
+        InitThreadSafe(hModule);
+    }
+    __except (CrashFilter(GetExceptionCode())) {
+        char msg[256];
+        snprintf(msg, sizeof(msg),
+            "[GroundedTracker] FATAL: Init thread crashed with exception 0x%08lX",
+            g_lastException);
+        OutputDebugStringA(msg);
+    }
+}
+
+void InitThread(HMODULE hModule) {
+    InitThreadSEH(hModule);
 }
 
 void Shutdown() {
