@@ -6,7 +6,67 @@
 
 using json = nlohmann::json;
 
-// Serialize ProgressSnapshot to JSON matching SaveProgress schema
+// Per-type serializers (no C++20 concepts needed)
+static json SerializeBosses(const std::vector<ProgressSnapshot::BossInfo>& items) {
+    json arr = json::array();
+    uint32_t count = 0;
+    for (auto& item : items) {
+        arr.push_back({{"id", item.id}, {"name", item.name}, {"defeated", item.defeated}});
+        if (item.defeated) count++;
+    }
+    return {{"items", arr}, {"collectedCount", count}, {"totalCount", items.size()}};
+}
+
+static json SerializeCards(const std::vector<ProgressSnapshot::CreatureCardInfo>& items) {
+    json arr = json::array();
+    uint32_t count = 0;
+    for (auto& item : items) {
+        arr.push_back({{"id", item.id}, {"name", item.name}, {"collected", item.collected}});
+        if (item.collected) count++;
+    }
+    return {{"items", arr}, {"collectedCount", count}, {"totalCount", items.size()}};
+}
+
+static json SerializeLandmarks(const std::vector<ProgressSnapshot::LandmarkInfo>& items) {
+    json arr = json::array();
+    uint32_t count = 0;
+    for (auto& item : items) {
+        arr.push_back({{"id", item.id}, {"name", item.name}, {"zone", item.zone}, {"discovered", item.discovered}});
+        if (item.discovered) count++;
+    }
+    return {{"items", arr}, {"collectedCount", count}, {"totalCount", items.size()}};
+}
+
+static json SerializeMixr(const std::vector<ProgressSnapshot::MixrInfo>& items) {
+    json arr = json::array();
+    uint32_t count = 0;
+    for (auto& item : items) {
+        arr.push_back({{"id", item.id}, {"name", item.name}, {"completed", item.completed}});
+        if (item.completed) count++;
+    }
+    return {{"items", arr}, {"collectedCount", count}, {"totalCount", items.size()}};
+}
+
+static json SerializeSchemes(const std::vector<ProgressSnapshot::ScabSchemeInfo>& items) {
+    json arr = json::array();
+    uint32_t count = 0;
+    for (auto& item : items) {
+        arr.push_back({{"id", item.id}, {"name", item.name}, {"collected", item.collected}});
+        if (item.collected) count++;
+    }
+    return {{"items", arr}, {"collectedCount", count}, {"totalCount", items.size()}};
+}
+
+static json SerializeCollectibles(const std::vector<ProgressSnapshot::CollectibleInfo>& items) {
+    json arr = json::array();
+    uint32_t count = 0;
+    for (auto& item : items) {
+        arr.push_back({{"id", item.id}, {"name", item.name}, {"subcategory", item.subcategory}, {"collected", item.collected}});
+        if (item.collected) count++;
+    }
+    return {{"items", arr}, {"collectedCount", count}, {"totalCount", items.size()}};
+}
+
 static std::string SerializeSnapshot(const ProgressSnapshot& snap) {
     auto now = std::chrono::system_clock::now();
     auto time = std::chrono::system_clock::to_time_t(now);
@@ -15,53 +75,20 @@ static std::string SerializeSnapshot(const ProgressSnapshot& snap) {
     char timeBuf[64];
     std::strftime(timeBuf, sizeof(timeBuf), "%Y-%m-%d %H:%M:%S", &tm);
 
-    auto serializeItems = [](const auto& items, const char* statusKey) -> json {
-        json arr = json::array();
-        uint32_t collected = 0;
-        for (auto& item : items) {
-            json obj;
-            obj["id"] = item.id;
-            obj["name"] = item.name;
-
-            if constexpr (requires { item.defeated; }) {
-                obj[statusKey] = item.defeated;
-                if (item.defeated) collected++;
-            } else if constexpr (requires { item.discovered; }) {
-                obj[statusKey] = item.discovered;
-                if (item.discovered) collected++;
-                if constexpr (requires { item.zone; }) {
-                    obj["zone"] = item.zone;
-                }
-            } else if constexpr (requires { item.completed; }) {
-                obj[statusKey] = item.completed;
-                if (item.completed) collected++;
-            } else if constexpr (requires { item.collected; }) {
-                obj[statusKey] = item.collected;
-                if (item.collected) collected++;
-                if constexpr (requires { item.subcategory; }) {
-                    obj["subcategory"] = item.subcategory;
-                }
-            }
-
-            arr.push_back(obj);
-        }
-        return json{{"items", arr}, {"collectedCount", collected}, {"totalCount", items.size()}};
-    };
-
     json j;
     j["saveName"] = "Live";
     j["savePath"] = "";
     j["lastModified"] = timeBuf;
     j["overallPercent"] = snap.overallPercent;
-    j["bosses"] = serializeItems(snap.bosses, "defeated");
-    j["creatureCards"] = serializeItems(snap.creatureCards, "collected");
-    j["landmarks"] = serializeItems(snap.landmarks, "discovered");
-    j["mixrChallenges"] = serializeItems(snap.mixrChallenges, "completed");
-    j["scabSchemes"] = serializeItems(snap.scabSchemes, "collected");
-    j["wendell"] = serializeItems(snap.wendell, "collected");
-    j["ominent"] = serializeItems(snap.ominent, "collected");
-    j["burglChips"] = serializeItems(snap.burglChips, "collected");
-    j["stuff"] = serializeItems(snap.stuff, "collected");
+    j["bosses"] = SerializeBosses(snap.bosses);
+    j["creatureCards"] = SerializeCards(snap.creatureCards);
+    j["landmarks"] = SerializeLandmarks(snap.landmarks);
+    j["mixrChallenges"] = SerializeMixr(snap.mixrChallenges);
+    j["scabSchemes"] = SerializeSchemes(snap.scabSchemes);
+    j["wendell"] = SerializeCollectibles(snap.wendell);
+    j["ominent"] = SerializeCollectibles(snap.ominent);
+    j["burglChips"] = SerializeCollectibles(snap.burglChips);
+    j["stuff"] = SerializeCollectibles(snap.stuff);
 
     j["milkMolars"] = {
         {"regularCollected", snap.milkMolars.regularCollected},
@@ -113,7 +140,7 @@ void PipeServer::AcceptLoop() {
         );
 
         if (m_hPipe == INVALID_HANDLE_VALUE) {
-            LOG_ERROR("CreateNamedPipe failed: {}", GetLastError());
+            LOG_ERROR("CreateNamedPipe failed: %lu", GetLastError());
             Sleep(1000);
             continue;
         }

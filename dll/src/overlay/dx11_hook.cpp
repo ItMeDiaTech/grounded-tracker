@@ -133,7 +133,7 @@ bool Install() {
     );
 
     if (FAILED(hr)) {
-        LOG_ERROR("Failed to create dummy D3D11 device: {:#x}", static_cast<uint32_t>(hr));
+        LOG_ERROR("Failed to create dummy D3D11 device: 0x%08x", static_cast<uint32_t>(hr));
         DestroyWindow(hDummyWnd);
         UnregisterClassW(wc.lpszClassName, wc.hInstance);
         return false;

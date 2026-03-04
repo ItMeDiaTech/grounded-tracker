@@ -1,15 +1,17 @@
 #pragma once
 
 #include <string>
-#include <format>
 #include <mutex>
 #include <fstream>
+#include <cstdarg>
 
 class Logger {
 public:
     static void Init(const std::wstring& logPath);
     static void Shutdown();
-    static void Log(const char* level, const std::string& message);
+
+    void Log(const char* level, const std::string& message);
+    void LogF(const char* level, const char* fmt, ...);
 
     static Logger& Instance();
 
@@ -19,7 +21,8 @@ private:
     bool m_initialized = false;
 };
 
-#define LOG_DEBUG(fmt, ...) Logger::Instance().Log("DEBUG", std::format(fmt __VA_OPT__(,) __VA_ARGS__))
-#define LOG_INFO(fmt, ...)  Logger::Instance().Log("INFO",  std::format(fmt __VA_OPT__(,) __VA_ARGS__))
-#define LOG_WARN(fmt, ...)  Logger::Instance().Log("WARN",  std::format(fmt __VA_OPT__(,) __VA_ARGS__))
-#define LOG_ERROR(fmt, ...) Logger::Instance().Log("ERROR", std::format(fmt __VA_OPT__(,) __VA_ARGS__))
+// Printf-style variadic macros (VS2019 compatible)
+#define LOG_DEBUG(...) Logger::Instance().LogF("DEBUG", __VA_ARGS__)
+#define LOG_INFO(...)  Logger::Instance().LogF("INFO",  __VA_ARGS__)
+#define LOG_WARN(...)  Logger::Instance().LogF("WARN",  __VA_ARGS__)
+#define LOG_ERROR(...) Logger::Instance().LogF("ERROR", __VA_ARGS__)

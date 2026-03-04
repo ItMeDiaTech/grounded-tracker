@@ -10,6 +10,7 @@
 #include "../core/engine.h"
 #include "../core/offsets.h"
 #include "../util/logger.h"
+#include <Windows.h>
 
 bool GameStateReader::Initialize() {
     return ResolvePointers();
@@ -39,7 +40,7 @@ ProgressSnapshot GameStateReader::ReadAll() {
         return snap;
     }
 
-    __try {
+    try {
         ReadBosses(snap);
         ReadCreatureCards(snap);
         ReadLandmarks(snap);
@@ -50,7 +51,6 @@ ProgressSnapshot GameStateReader::ReadAll() {
         ReadUpgrades(snap);
 
         // Calculate overall percent
-        // Weights mirror the Rust implementation
         float total = 0.0f;
         float earned = 0.0f;
         auto addCategory = [&](uint32_t collected, uint32_t total_count) {
@@ -102,8 +102,8 @@ ProgressSnapshot GameStateReader::ReadAll() {
         snap.overallPercent = (total > 0.0f) ? (earned / total * 100.0f) : 0.0f;
         snap.valid = true;
     }
-    __except (EXCEPTION_EXECUTE_HANDLER) {
-        LOG_ERROR("SEH exception during ReadAll");
+    catch (...) {
+        LOG_ERROR("Exception during ReadAll");
         snap.valid = false;
     }
 

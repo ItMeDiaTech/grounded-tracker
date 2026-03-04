@@ -2,7 +2,7 @@
 #include <Windows.h>
 #include <chrono>
 #include <filesystem>
-#include <format>
+#include <cstdio>
 
 Logger& Logger::Instance() {
     static Logger instance;
@@ -52,11 +52,13 @@ void Logger::Log(const char* level, const std::string& message) {
     std::tm tm;
     localtime_s(&tm, &time);
 
-    auto line = std::format("[{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}.{:03d}] [{}] {}",
+    char line[2048];
+    snprintf(line, sizeof(line),
+        "[%04d-%02d-%02d %02d:%02d:%02d.%03d] [%s] %s",
         tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
         tm.tm_hour, tm.tm_min, tm.tm_sec,
         static_cast<int>(ms.count()),
-        level, message);
+        level, message.c_str());
 
     // Write to file
     if (m_initialized && m_file.is_open()) {
@@ -64,6 +66,15 @@ void Logger::Log(const char* level, const std::string& message) {
     }
 
     // Also output to debugger
-    OutputDebugStringA(line.c_str());
+    OutputDebugStringA(line);
     OutputDebugStringA("\n");
+}
+
+void Logger::LogF(const char* level, const char* fmt, ...) {
+    char msgBuf[2048];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(msgBuf, sizeof(msgBuf), fmt, args);
+    va_end(args);
+    Log(level, std::string(msgBuf));
 }

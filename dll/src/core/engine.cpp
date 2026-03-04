@@ -16,12 +16,12 @@ bool InitializeEngine() {
     }
 
     auto moduleBase = reinterpret_cast<uintptr_t>(gameModule);
-    LOG_INFO("Game module base: {:#x}", moduleBase);
+    LOG_INFO("Game module base: 0x%llx", moduleBase);
 
     // Use offsets if they've been populated (from Dumper-7 SDK)
     if (Offsets::GWorld != 0) {
         g_GWorld = moduleBase + Offsets::GWorld;
-        LOG_INFO("GWorld from offset: {:#x}", g_GWorld);
+        LOG_INFO("GWorld from offset: 0x%llx", g_GWorld);
     } else {
         // Pattern scan fallback — these patterns are UE4 version-specific
         // and will need updating after Dumper-7 generates the SDK
@@ -29,7 +29,7 @@ bool InitializeEngine() {
             "48 8B 05 ?? ?? ?? ?? 48 3B C8 74 06");
         if (addr) {
             g_GWorld = Memory::ResolveRIPRelative(addr + 3);
-            LOG_INFO("GWorld from pattern: {:#x}", g_GWorld);
+            LOG_INFO("GWorld from pattern: 0x%llx", g_GWorld);
         } else {
             LOG_ERROR("Failed to find GWorld");
             return false;
@@ -38,13 +38,13 @@ bool InitializeEngine() {
 
     if (Offsets::GObjects != 0) {
         g_GObjects = moduleBase + Offsets::GObjects;
-        LOG_INFO("GObjects from offset: {:#x}", g_GObjects);
+        LOG_INFO("GObjects from offset: 0x%llx", g_GObjects);
     } else {
         auto addr = Memory::PatternScan(gameModule,
             "48 8B 05 ?? ?? ?? ?? 48 8B 0C C8 48 8D 04 D1");
         if (addr) {
             g_GObjects = Memory::ResolveRIPRelative(addr + 3);
-            LOG_INFO("GObjects from pattern: {:#x}", g_GObjects);
+            LOG_INFO("GObjects from pattern: 0x%llx", g_GObjects);
         } else {
             LOG_WARN("Failed to find GObjects (non-critical)");
         }
@@ -52,13 +52,13 @@ bool InitializeEngine() {
 
     if (Offsets::GNames != 0) {
         g_GNames = moduleBase + Offsets::GNames;
-        LOG_INFO("GNames from offset: {:#x}", g_GNames);
+        LOG_INFO("GNames from offset: 0x%llx", g_GNames);
     } else {
         auto addr = Memory::PatternScan(gameModule,
             "48 8D 05 ?? ?? ?? ?? EB 16 48 8D 0D");
         if (addr) {
             g_GNames = Memory::ResolveRIPRelative(addr + 3);
-            LOG_INFO("GNames from pattern: {:#x}", g_GNames);
+            LOG_INFO("GNames from pattern: 0x%llx", g_GNames);
         } else {
             LOG_WARN("Failed to find GNames (non-critical)");
         }
@@ -71,7 +71,7 @@ bool InitializeEngine() {
         return false;
     }
 
-    LOG_INFO("UWorld instance: {:#x}", worldPtr.value());
+    LOG_INFO("UWorld instance: 0x%llx", worldPtr.value());
     return true;
 }
 

@@ -1,7 +1,7 @@
 #include "overlay_ui.h"
 #include <imgui.h>
 #include <mutex>
-#include <format>
+#include <cstdio>
 
 static std::mutex g_stateMutex;
 static ProgressSnapshot g_state;
@@ -17,11 +17,12 @@ void UpdateState(const ProgressSnapshot& snap) {
 
 static void ProgressBar(const char* label, uint32_t current, uint32_t total) {
     float frac = (total > 0) ? static_cast<float>(current) / static_cast<float>(total) : 0.0f;
-    auto text = std::format("{}/{}", current, total);
+    char text[32];
+    snprintf(text, sizeof(text), "%u/%u", current, total);
 
     ImGui::Text("%-16s", label);
     ImGui::SameLine(140.0f);
-    ImGui::Text("%s", text.c_str());
+    ImGui::Text("%s", text);
     ImGui::SameLine(210.0f);
     ImGui::PushStyleColor(ImGuiCol_PlotHistogram,
         (current >= total) ? ImVec4(0.83f, 0.66f, 0.26f, 1.0f) : ImVec4(0.2f, 0.8f, 0.4f, 1.0f));
@@ -29,19 +30,39 @@ static void ProgressBar(const char* label, uint32_t current, uint32_t total) {
     ImGui::PopStyleColor();
 }
 
-static uint32_t CountCollected(const auto& items) {
+static uint32_t CountBosses(const std::vector<ProgressSnapshot::BossInfo>& items) {
     uint32_t count = 0;
-    for (auto& item : items) {
-        if constexpr (requires { item.defeated; }) {
-            if (item.defeated) count++;
-        } else if constexpr (requires { item.discovered; }) {
-            if (item.discovered) count++;
-        } else if constexpr (requires { item.completed; }) {
-            if (item.completed) count++;
-        } else if constexpr (requires { item.collected; }) {
-            if (item.collected) count++;
-        }
-    }
+    for (auto& item : items) if (item.defeated) count++;
+    return count;
+}
+
+static uint32_t CountLandmarks(const std::vector<ProgressSnapshot::LandmarkInfo>& items) {
+    uint32_t count = 0;
+    for (auto& item : items) if (item.discovered) count++;
+    return count;
+}
+
+static uint32_t CountMixr(const std::vector<ProgressSnapshot::MixrInfo>& items) {
+    uint32_t count = 0;
+    for (auto& item : items) if (item.completed) count++;
+    return count;
+}
+
+static uint32_t CountCards(const std::vector<ProgressSnapshot::CreatureCardInfo>& items) {
+    uint32_t count = 0;
+    for (auto& item : items) if (item.collected) count++;
+    return count;
+}
+
+static uint32_t CountSchemes(const std::vector<ProgressSnapshot::ScabSchemeInfo>& items) {
+    uint32_t count = 0;
+    for (auto& item : items) if (item.collected) count++;
+    return count;
+}
+
+static uint32_t CountCollectibles(const std::vector<ProgressSnapshot::CollectibleInfo>& items) {
+    uint32_t count = 0;
+    for (auto& item : items) if (item.collected) count++;
     return count;
 }
 
@@ -53,36 +74,37 @@ void Render() {
 
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 
-    auto title = std::format("GROUNDED: S RANK TRACKER [{:.1f}%]###SRankTracker",
-                              g_hasData ? g_state.overallPercent : 0.0f);
+    char title[128];
+    snprintf(title, sizeof(title), "GROUNDED: S RANK TRACKER [%.1f%%]###SRankTracker",
+             g_hasData ? g_state.overallPercent : 0.0f);
 
-    if (ImGui::Begin(title.c_str(), nullptr, flags)) {
+    if (ImGui::Begin(title, nullptr, flags)) {
         if (!g_hasData) {
             ImGui::Text("Waiting for game data...");
         } else {
             // Main categories
-            ProgressBar("Bosses", CountCollected(g_state.bosses),
+            ProgressBar("Bosses", CountBosses(g_state.bosses),
                         static_cast<uint32_t>(g_state.bosses.size()));
-            ProgressBar("Creature Cards", CountCollected(g_state.creatureCards),
+            ProgressBar("Creature Cards", CountCards(g_state.creatureCards),
                         static_cast<uint32_t>(g_state.creatureCards.size()));
-            ProgressBar("Landmarks", CountCollected(g_state.landmarks),
+            ProgressBar("Landmarks", CountLandmarks(g_state.landmarks),
                         static_cast<uint32_t>(g_state.landmarks.size()));
             ProgressBar("Milk Molars",
                         g_state.milkMolars.regularCollected + g_state.milkMolars.megaCollected,
                         g_state.milkMolars.regularTotal + g_state.milkMolars.megaTotal);
-            ProgressBar("MIX.R", CountCollected(g_state.mixrChallenges),
+            ProgressBar("MIX.R", CountMixr(g_state.mixrChallenges),
                         static_cast<uint32_t>(g_state.mixrChallenges.size()));
-            ProgressBar("SCA.B Schemes", CountCollected(g_state.scabSchemes),
+            ProgressBar("SCA.B Schemes", CountSchemes(g_state.scabSchemes),
                         static_cast<uint32_t>(g_state.scabSchemes.size()));
 
             ImGui::Separator();
 
             // Collectibles row
             ImGui::Columns(2, nullptr, false);
-            auto wendellCollected = CountCollected(g_state.wendell);
-            auto ominentCollected = CountCollected(g_state.ominent);
-            auto burglCollected = CountCollected(g_state.burglChips);
-            auto stuffCollected = CountCollected(g_state.stuff);
+            auto wendellCollected = CountCollectibles(g_state.wendell);
+            auto ominentCollected = CountCollectibles(g_state.ominent);
+            auto burglCollected = CountCollectibles(g_state.burglChips);
+            auto stuffCollected = CountCollectibles(g_state.stuff);
 
             ImGui::Text("Wendell  %u/%u", wendellCollected,
                         static_cast<uint32_t>(g_state.wendell.size()));

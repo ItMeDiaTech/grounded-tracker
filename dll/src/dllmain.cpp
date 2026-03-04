@@ -20,7 +20,7 @@ static PipeServer g_pipeServer;
 static constexpr DWORD g_pollIntervalMs = 2000;
 
 void PollThreadFunc() {
-    LOG_INFO("Poll thread started (interval: {}ms)", g_pollIntervalMs);
+    LOG_INFO("Poll thread started (interval: %lums)", g_pollIntervalMs);
 
     while (!g_shutdown.load()) {
         auto snap = g_reader.ReadAll();
@@ -42,7 +42,7 @@ void InitThread(HMODULE hModule) {
     Logger::Init(logPath);
 
     LOG_INFO("=== Grounded Tracker DLL Loaded ===");
-    LOG_INFO("Module base: {:#x}", reinterpret_cast<uintptr_t>(hModule));
+    LOG_INFO("Module base: 0x%llx", reinterpret_cast<uintptr_t>(hModule));
 
     // Wait for the game module to be fully loaded
     HMODULE gameModule = nullptr;
@@ -53,7 +53,7 @@ void InitThread(HMODULE hModule) {
     }
     if (g_shutdown.load()) return;
 
-    LOG_INFO("Game module found at: {:#x}", reinterpret_cast<uintptr_t>(gameModule));
+    LOG_INFO("Game module found at: 0x%llx", reinterpret_cast<uintptr_t>(gameModule));
 
     // Resolve UE4 engine globals
     if (!InitializeEngine()) {

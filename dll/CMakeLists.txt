@@ -53,7 +53,7 @@ target_include_directories(grounded_tracker PRIVATE
     ${IMGUI_DIR}
     ${IMGUI_DIR}/backends
     ${MINHOOK_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/nlohmann
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor
 )
 
 target_link_libraries(grounded_tracker PRIVATE

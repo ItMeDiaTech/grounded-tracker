@@ -10,7 +10,7 @@ bool IsAchievementComplete(uintptr_t gameState, const std::string& achievementId
 
     // TODO: Walk achievement component after SDK generation
     // GameState -> AchievementsComponent -> find achievement by ID -> check completed flag
-    LOG_DEBUG("IsAchievementComplete('{}') — stub, offsets not populated", achievementId);
+    LOG_DEBUG("IsAchievementComplete('%s') — stub, offsets not populated", achievementId.c_str());
     return false;
 }
 
@@ -18,7 +18,7 @@ std::optional<int32_t> GetAchievementProgress(uintptr_t gameState, const std::st
     if (!gameState) return std::nullopt;
 
     // TODO: Walk achievement component after SDK generation
-    LOG_DEBUG("GetAchievementProgress('{}') — stub, offsets not populated", achievementId);
+    LOG_DEBUG("GetAchievementProgress('%s') — stub, offsets not populated", achievementId.c_str());
     return std::nullopt;
 }
 
