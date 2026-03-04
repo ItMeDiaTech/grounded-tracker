@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
-import type { SaveProgress, WatcherStatus } from "../types/save-data";
+import type { SaveProgress, ConnectionStatus } from "../types/save-data";
 
 interface SaveSyncState {
   data: SaveProgress | null;
-  status: WatcherStatus | null;
+  status: ConnectionStatus | null;
   lastError: string | null;
   lastSync: string | null;
   loading: boolean;
@@ -13,13 +13,13 @@ interface SaveSyncState {
 
 export function useSaveSync(): SaveSyncState {
   const [data, setData] = useState<SaveProgress | null>(null);
-  const [status, setStatus] = useState<WatcherStatus | null>(null);
+  const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [lastError, setLastError] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Listen for save data updates from the Rust watcher
+    // Listen for save data updates from the pipe connection
     const unlistenSave = listen<SaveProgress>("save-updated", (event) => {
       setData(event.payload);
       setLastSync(new Date().toLocaleTimeString());
@@ -32,7 +32,7 @@ export function useSaveSync(): SaveSyncState {
       setLoading(false);
     });
 
-    const unlistenStatus = listen<WatcherStatus>("watcher-status", (event) => {
+    const unlistenStatus = listen<ConnectionStatus>("connection-status", (event) => {
       setStatus(event.payload);
       if (event.payload.error) {
         setLastError(event.payload.error);
@@ -40,25 +40,16 @@ export function useSaveSync(): SaveSyncState {
       setLoading(false);
     });
 
-    // Fetch initial data directly — bypasses event race condition
-    invoke<SaveProgress>("get_save_progress")
-      .then((progress) => {
-        setData(progress);
-        setLastSync(new Date().toLocaleTimeString());
-        setLoading(false);
-      })
-      .catch((e) => {
-        setLastError(String(e));
-        setLoading(false);
-      });
-
-    // Fetch watcher status for display (doesn't control loading)
-    invoke<WatcherStatus>("get_watcher_status")
+    // Fetch initial connection status
+    invoke<ConnectionStatus>("get_connection_status")
       .then((s) => {
         setStatus(s);
         if (s.error) setLastError(s.error);
+        setLoading(false);
       })
-      .catch(() => {});
+      .catch(() => {
+        setLoading(false);
+      });
 
     return () => {
       unlistenSave.then((f) => f());

@@ -4,10 +4,11 @@ interface HeaderProps {
   overallPercent: number;
   saveName: string;
   lastSync: string | null;
-  watching: boolean;
+  gameRunning: boolean;
+  connected: boolean;
 }
 
-export function Header({ overallPercent, saveName, lastSync, watching }: HeaderProps) {
+export function Header({ overallPercent, saveName, lastSync, gameRunning, connected }: HeaderProps) {
   const percent = Math.round(overallPercent * 10) / 10;
   const isComplete = percent >= 100;
 
@@ -22,7 +23,7 @@ export function Header({ overallPercent, saveName, lastSync, watching }: HeaderP
           <div style={styles.saveName}>{saveName}</div>
         </div>
         <div style={styles.statusArea}>
-          <ConnectionDot watching={watching} />
+          <ConnectionIndicator gameRunning={gameRunning} connected={connected} />
           {lastSync && (
             <span style={styles.lastSync}>Last sync: {lastSync}</span>
           )}
@@ -61,21 +62,35 @@ export function Header({ overallPercent, saveName, lastSync, watching }: HeaderP
   );
 }
 
-function ConnectionDot({ watching }: { watching: boolean }) {
+function ConnectionIndicator({ gameRunning, connected }: { gameRunning: boolean; connected: boolean }) {
+  let color: string;
+  let glow: string;
+  let label: string;
+
+  if (connected) {
+    color = "var(--accent-green)";
+    glow = "0 0 6px var(--accent-green-glow)";
+    label = "Connected";
+  } else if (gameRunning) {
+    color = "var(--accent-gold, #d4a843)";
+    glow = "0 0 6px rgba(212, 168, 67, 0.4)";
+    label = "Waiting for DLL";
+  } else {
+    color = "var(--accent-red, #e05252)";
+    glow = "none";
+    label = "Game not running";
+  }
+
   return (
     <div style={styles.connectionRow}>
       <div
         style={{
           ...styles.dot,
-          backgroundColor: watching ? "var(--accent-green)" : "var(--accent-red)",
-          boxShadow: watching
-            ? "0 0 6px var(--accent-green-glow)"
-            : "none",
+          backgroundColor: color,
+          boxShadow: glow,
         }}
       />
-      <span style={styles.connectionLabel}>
-        {watching ? "Watching" : "Disconnected"}
-      </span>
+      <span style={styles.connectionLabel}>{label}</span>
     </div>
   );
 }

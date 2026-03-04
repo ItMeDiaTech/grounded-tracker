@@ -155,9 +155,10 @@ function App() {
     <div style={styles.app}>
       <Header
         overallPercent={data?.overallPercent ?? 0}
-        saveName={data?.saveName ?? "No save loaded"}
+        saveName={data?.saveName ?? "Waiting for connection"}
         lastSync={lastSync}
-        watching={status?.watching ?? false}
+        gameRunning={status?.gameRunning ?? false}
+        connected={status?.connected ?? false}
       />
 
       {lastError && <ErrorBanner message={lastError} />}

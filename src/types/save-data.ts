@@ -68,15 +68,10 @@ export interface CollectibleItem {
   collected: boolean;
 }
 
-export interface SaveFolderInfo {
-  name: string;
-  path: string;
-  lastModified: string;
-}
-
-export interface WatcherStatus {
-  watching: boolean;
-  activeSave: string | null;
+export interface ConnectionStatus {
+  connected: boolean;
+  gameRunning: boolean;
+  dllInjected: boolean;
   lastUpdate: string | null;
   error: string | null;
 }
