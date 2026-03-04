@@ -1,6 +1,6 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveProgress {
     pub save_name: String,
@@ -19,7 +19,7 @@ pub struct SaveProgress {
     pub stuff: CategoryProgress<CollectibleItem>,
 }
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CategoryProgress<T: Serialize> {
     pub items: Vec<T>,
@@ -27,7 +27,7 @@ pub struct CategoryProgress<T: Serialize> {
     pub total_count: u32,
 }
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CreatureCardItem {
     pub id: String,
@@ -35,7 +35,7 @@ pub struct CreatureCardItem {
     pub collected: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct LandmarkItem {
     pub id: String,
@@ -44,7 +44,7 @@ pub struct LandmarkItem {
     pub discovered: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct MilkMolarProgress {
     pub regular_collected: u32,
@@ -54,7 +54,7 @@ pub struct MilkMolarProgress {
     pub total_spent: u32,
 }
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct MixrItem {
     pub id: String,
@@ -62,7 +62,7 @@ pub struct MixrItem {
     pub completed: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct ScabSchemeItem {
     pub id: String,
@@ -70,7 +70,7 @@ pub struct ScabSchemeItem {
     pub collected: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct BossItem {
     pub id: String,
@@ -78,7 +78,7 @@ pub struct BossItem {
     pub defeated: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CollectibleItem {
     pub id: String,
@@ -89,17 +89,10 @@ pub struct CollectibleItem {
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SaveFolderInfo {
-    pub name: String,
-    pub path: String,
-    pub last_modified: String,
-}
-
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct WatcherStatus {
-    pub watching: bool,
-    pub active_save: Option<String>,
+pub struct ConnectionStatus {
+    pub connected: bool,
+    pub game_running: bool,
+    pub dll_injected: bool,
     pub last_update: Option<String>,
     pub error: Option<String>,
 }
