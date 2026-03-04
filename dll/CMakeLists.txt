@@ -30,6 +30,7 @@ add_library(grounded_tracker SHARED
     src/dllmain.cpp
     src/core/engine.cpp
     src/core/memory.cpp
+    src/core/ue4_types.cpp
     src/game/game_state.cpp
     src/game/achievements.cpp
     src/game/creature_cards.cpp

@@ -4,6 +4,7 @@
 
 #include "core/engine.h"
 #include "core/memory.h"
+#include "core/ue4_types.h"
 #include "game/game_state.h"
 #include "ipc/pipe_server.h"
 #include "overlay/dx11_hook.h"
@@ -65,6 +66,13 @@ void InitThreadSafe(HMODULE hModule) {
     }
     LOG_INFO("UE4 engine globals resolved");
 
+    // Initialize FName resolver (needed by all game readers)
+    if (!InitFNameResolver()) {
+        LOG_WARN("FName resolver init failed — name resolution disabled");
+    } else {
+        LOG_INFO("FName resolver initialized");
+    }
+
     // Initialize game state reader
     if (!g_reader.Initialize()) {
         LOG_WARN("Game state reader init failed (will retry during polling)");
@@ -73,14 +81,11 @@ void InitThreadSafe(HMODULE hModule) {
     }
 
     // Install DX11 hook for ImGui overlay (non-fatal)
-    // Disabled for initial testing to avoid crashes
-    // TODO: Re-enable after verifying pipe communication works
-    LOG_INFO("DX11 hook SKIPPED (disabled for initial testing)");
-    // if (!DX11Hook::Install()) {
-    //     LOG_WARN("Failed to install DX11 hook (overlay disabled)");
-    // } else {
-    //     LOG_INFO("DX11 hook installed");
-    // }
+    if (!DX11Hook::Install()) {
+        LOG_WARN("Failed to install DX11 hook (overlay disabled)");
+    } else {
+        LOG_INFO("DX11 hook installed");
+    }
 
     // Start named pipe server
     if (!g_pipeServer.Start()) {

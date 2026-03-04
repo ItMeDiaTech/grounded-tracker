@@ -1,9 +1,13 @@
 #include "creature_cards.h"
 #include "../core/memory.h"
 #include "../core/offsets.h"
+#include "../core/ue4_types.h"
 #include "../util/logger.h"
+#include <algorithm>
+#include <string>
 
 // 68 creature card mappings — matches src-tauri/src/categories/creature_cards.rs
+// IDs are our internal identifiers; FName matching uses case-insensitive contains
 static const struct { const char* id; const char* name; } CARD_DATA[] = {
     {"ant_red_worker", "Red Worker Ant"},
     {"ant_red_soldier", "Red Soldier Ant"},
@@ -76,6 +80,34 @@ static const struct { const char* id; const char* name; } CARD_DATA[] = {
 };
 static constexpr size_t CARD_COUNT = sizeof(CARD_DATA) / sizeof(CARD_DATA[0]);
 
+// Convert string to lowercase for matching
+static std::string ToLower(const std::string& s) {
+    std::string out = s;
+    std::transform(out.begin(), out.end(), out.begin(), ::tolower);
+    return out;
+}
+
+// Try to match a resolved FName against our card IDs
+// The game's FName might be e.g. "Ant_Red_Worker" while our ID is "ant_red_worker"
+static int FindCardIndex(const std::string& fname) {
+    std::string fnameLower = ToLower(fname);
+    // Replace spaces/dashes with underscores for flexible matching
+    for (auto& c : fnameLower) {
+        if (c == ' ' || c == '-') c = '_';
+    }
+
+    for (size_t i = 0; i < CARD_COUNT; ++i) {
+        if (fnameLower == CARD_DATA[i].id) return static_cast<int>(i);
+    }
+
+    // Try substring matching — FName might have prefixes like "CreatureCard_"
+    for (size_t i = 0; i < CARD_COUNT; ++i) {
+        if (fnameLower.find(CARD_DATA[i].id) != std::string::npos) return static_cast<int>(i);
+    }
+
+    return -1;
+}
+
 void ReadCreatureCardsFromMemory(uintptr_t playerState, ProgressSnapshot& snap) {
     // Populate all cards as not-collected by default
     snap.creatureCards.clear();
@@ -91,7 +123,52 @@ void ReadCreatureCardsFromMemory(uintptr_t playerState, ProgressSnapshot& snap) 
 
     if (!playerState) return;
 
-    // TODO: Read creature card collection state from UE4 memory after SDK generation
-    // PlayerState -> CreatureCardsComponent -> CollectedArray -> match indices to CARD_DATA
-    LOG_DEBUG("ReadCreatureCards — stub, offsets not populated");
+    // Approach 1: Read InspectedItems from PlayerState
+    // TArray<FDataTableRowHandle_NetCrc> — 12 bytes each: FName(8) + CRC(4)
+    auto arr = ReadTArray(playerState, Offsets::PlayerState_InspectedItems);
+    if (arr && arr->count > 0) {
+        static constexpr size_t ROW_HANDLE_SIZE = 12;
+        uint32_t matched = 0;
+
+        static bool loggedOnce = false;
+        if (!loggedOnce) {
+            LOG_INFO("=== InspectedItems Dump (%d entries) ===", arr->count);
+        }
+
+        for (int32_t i = 0; i < arr->count; ++i) {
+            uintptr_t elemAddr = arr->data + i * ROW_HANDLE_SIZE;
+            std::string rowName = ResolveFNameAt(elemAddr, 0);
+            if (rowName.empty()) continue;
+
+            if (!loggedOnce) {
+                LOG_INFO("  InspectedItem[%d]: '%s'", i, rowName.c_str());
+            }
+
+            int idx = FindCardIndex(rowName);
+            if (idx >= 0) {
+                snap.creatureCards[idx].collected = true;
+                matched++;
+            }
+        }
+
+        if (!loggedOnce) {
+            LOG_INFO("=== End InspectedItems Dump (matched %u/%zu cards) ===",
+                     matched, CARD_COUNT);
+            loggedOnce = true;
+        }
+
+        if (matched > 0) {
+            LOG_DEBUG("CreatureCards: %u/%zu from InspectedItems (%d total inspected)",
+                      matched, CARD_COUNT, arr->count);
+            return;  // InspectedItems worked, skip bestiary fallback
+        }
+    }
+
+    // Approach 2: Try BestiaryComponent on GameState
+    // Read the stats array and try to resolve creature names
+    // This is exploratory — FBestiaryStat layout is unknown
+    // GameState is reachable from the engine, but we don't have it here.
+    // For now, log diagnostics if InspectedItems didn't match anything.
+    LOG_DEBUG("CreatureCards: InspectedItems yielded no matches, "
+              "creature card tracking requires further investigation");
 }

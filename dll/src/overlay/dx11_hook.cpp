@@ -101,54 +101,112 @@ static HRESULT WINAPI HookedPresent(IDXGISwapChain* pSwapChain, UINT SyncInterva
     return g_origPresent(pSwapChain, SyncInterval, Flags);
 }
 
-namespace DX11Hook {
+// ============================================================================
+// Present vtable extraction — avoids creating a hardware device that conflicts
+// with the game's existing device. Uses WARP (software renderer) or NULL driver.
+// ============================================================================
 
-bool Install() {
-    // Create a dummy D3D11 device + swap chain to get vtable
-    WNDCLASSEXW wc{sizeof(WNDCLASSEXW), CS_CLASSDC, DefWindowProcW, 0, 0,
-                   GetModuleHandleW(nullptr), nullptr, nullptr, nullptr, nullptr,
-                   L"DummyDX11", nullptr};
-    RegisterClassExW(&wc);
-
-    HWND hDummyWnd = CreateWindowExW(0, wc.lpszClassName, L"", WS_OVERLAPPEDWINDOW,
-                                      0, 0, 1, 1, nullptr, nullptr, wc.hInstance, nullptr);
-
+// SEH-protected wrapper for device creation (must be free of C++ destructors)
+static HRESULT CreateDummyDeviceSEH(HWND hWnd, D3D_DRIVER_TYPE driverType,
+                                     IDXGISwapChain** ppSwapChain,
+                                     ID3D11Device** ppDevice,
+                                     ID3D11DeviceContext** ppContext) {
     DXGI_SWAP_CHAIN_DESC sd{};
     sd.BufferCount = 1;
     sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    sd.BufferDesc.Width = 2;
+    sd.BufferDesc.Height = 2;
     sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    sd.OutputWindow = hDummyWnd;
+    sd.OutputWindow = hWnd;
     sd.SampleDesc.Count = 1;
     sd.Windowed = TRUE;
     sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 
-    IDXGISwapChain* pDummySwapChain = nullptr;
-    ID3D11Device* pDummyDevice = nullptr;
-    ID3D11DeviceContext* pDummyContext = nullptr;
-
     D3D_FEATURE_LEVEL featureLevel;
-    HRESULT hr = D3D11CreateDeviceAndSwapChain(
-        nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0,
-        D3D11_SDK_VERSION, &sd, &pDummySwapChain, &pDummyDevice, &featureLevel, &pDummyContext
-    );
+    HRESULT hr = E_FAIL;
 
-    if (FAILED(hr)) {
-        LOG_ERROR("Failed to create dummy D3D11 device: 0x%08x", static_cast<uint32_t>(hr));
-        DestroyWindow(hDummyWnd);
-        UnregisterClassW(wc.lpszClassName, wc.hInstance);
-        return false;
+    __try {
+        hr = D3D11CreateDeviceAndSwapChain(
+            nullptr, driverType, nullptr, 0, nullptr, 0,
+            D3D11_SDK_VERSION, &sd, ppSwapChain, ppDevice, &featureLevel, ppContext
+        );
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        hr = E_FAIL;
     }
 
-    // Get Present from vtable
-    void** vtable = *reinterpret_cast<void***>(pDummySwapChain);
-    auto* pPresent = reinterpret_cast<PFN_Present>(vtable[8]);
+    return hr;
+}
 
-    // Cleanup dummy
-    pDummySwapChain->Release();
-    pDummyDevice->Release();
-    pDummyContext->Release();
+static PFN_Present ExtractPresentFromVtable() {
+    // Create a tiny hidden window for the dummy swap chain
+    WNDCLASSEXW wc{sizeof(WNDCLASSEXW), CS_CLASSDC, DefWindowProcW, 0, 0,
+                   GetModuleHandleW(nullptr), nullptr, nullptr, nullptr, nullptr,
+                   L"DummyDX11Vtable", nullptr};
+    RegisterClassExW(&wc);
+
+    HWND hDummyWnd = CreateWindowExW(0, wc.lpszClassName, L"", WS_OVERLAPPEDWINDOW,
+                                      0, 0, 2, 2, nullptr, nullptr, wc.hInstance, nullptr);
+    if (!hDummyWnd) {
+        LOG_ERROR("Failed to create dummy window for vtable extraction");
+        UnregisterClassW(wc.lpszClassName, wc.hInstance);
+        return nullptr;
+    }
+
+    IDXGISwapChain* pSwapChain = nullptr;
+    ID3D11Device* pDevice = nullptr;
+    ID3D11DeviceContext* pContext = nullptr;
+    PFN_Present pPresent = nullptr;
+
+    // Try WARP first — software renderer, doesn't conflict with game's hardware device
+    HRESULT hr = CreateDummyDeviceSEH(hDummyWnd, D3D_DRIVER_TYPE_WARP,
+                                       &pSwapChain, &pDevice, &pContext);
+    if (SUCCEEDED(hr)) {
+        LOG_INFO("Dummy device created with WARP driver");
+    } else {
+        // Try REFERENCE driver
+        hr = CreateDummyDeviceSEH(hDummyWnd, D3D_DRIVER_TYPE_REFERENCE,
+                                   &pSwapChain, &pDevice, &pContext);
+        if (SUCCEEDED(hr)) {
+            LOG_INFO("Dummy device created with REFERENCE driver");
+        } else {
+            // Last resort: hardware (may crash, but SEH-protected)
+            hr = CreateDummyDeviceSEH(hDummyWnd, D3D_DRIVER_TYPE_HARDWARE,
+                                       &pSwapChain, &pDevice, &pContext);
+            if (SUCCEEDED(hr)) {
+                LOG_INFO("Dummy device created with HARDWARE driver");
+            }
+        }
+    }
+
+    if (SUCCEEDED(hr) && pSwapChain) {
+        // Extract Present from vtable index 8
+        void** vtable = *reinterpret_cast<void***>(pSwapChain);
+        pPresent = reinterpret_cast<PFN_Present>(vtable[8]);
+        LOG_INFO("IDXGISwapChain::Present at 0x%llx", reinterpret_cast<uintptr_t>(pPresent));
+    } else {
+        LOG_ERROR("All dummy device creation methods failed (HRESULT 0x%08x)",
+                  static_cast<uint32_t>(hr));
+    }
+
+    // Cleanup
+    if (pSwapChain) pSwapChain->Release();
+    if (pDevice) pDevice->Release();
+    if (pContext) pContext->Release();
     DestroyWindow(hDummyWnd);
     UnregisterClassW(wc.lpszClassName, wc.hInstance);
+
+    return pPresent;
+}
+
+namespace DX11Hook {
+
+bool Install() {
+    auto pPresent = ExtractPresentFromVtable();
+    if (!pPresent) {
+        LOG_ERROR("Could not extract Present address — DX11 hook disabled");
+        return false;
+    }
 
     // Install MinHook
     if (MH_Initialize() != MH_OK) {

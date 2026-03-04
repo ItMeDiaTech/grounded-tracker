@@ -9,6 +9,7 @@
 #include "upgrades.h"
 #include "../core/engine.h"
 #include "../core/offsets.h"
+#include "../core/ue4_types.h"
 #include "../util/logger.h"
 #include <Windows.h>
 
@@ -28,6 +29,14 @@ bool GameStateReader::ResolvePointers() {
     }
 
     m_initialized = (m_gameState != 0);
+
+    // Log all achievement names on first successful resolve (diagnostic)
+    static bool achievementsDumped = false;
+    if (m_initialized && m_playerState && !achievementsDumped) {
+        Achievements::LogAllAchievements(m_playerState);
+        achievementsDumped = true;
+    }
+
     return m_initialized;
 }
 
@@ -124,7 +133,7 @@ void GameStateReader::ReadBosses(ProgressSnapshot& snap) {
 
     snap.bosses.clear();
     for (auto& [id, name] : BOSS_DATA) {
-        bool defeated = Achievements::IsAchievementComplete(m_gameState, id);
+        bool defeated = Achievements::IsAchievementComplete(m_playerState, id);
         snap.bosses.push_back({id, name, defeated});
     }
 }
@@ -146,7 +155,7 @@ void GameStateReader::ReadMixr(ProgressSnapshot& snap) {
 }
 
 void GameStateReader::ReadScabSchemes(ProgressSnapshot& snap) {
-    ReadScabSchemesFromMemory(m_playerState, snap);
+    ReadScabSchemesFromMemory(m_gameState, snap);
 }
 
 void GameStateReader::ReadTableItems(ProgressSnapshot& snap) {
